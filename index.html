@@ -1,12 +1,1488 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Men Ficha</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-MEN // FICHA DE PERSONAGEM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --panel: #181818;
+    --border: #2a2a2a;
+    --border-bright: #444;
+    --yellow: #f0c020;
+    --yellow-dim: #8a6e10;
+    --red: #cc2200;
+    --white: #e8e8e8;
+    --muted: #666;
+    --tag-bg: #1a1a1a;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'Barlow Condensed', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCAN LINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--black);
+    border-bottom: 2px solid var(--yellow);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .x-logo {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .x-logo svg { width: 100%; height: 100%; }
+
+  .header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .header-title h1 {
+    font-family: var(--display);
+    font-size: 2rem;
+    color: var(--yellow);
+    letter-spacing: 0.15em;
+    line-height: 1;
+  }
+
+  .header-title .subtitle {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+  }
+
+  .header-meta {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 8px 16px;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+    background: rgba(240,192,32,0.06);
+  }
+
+  .btn-primary {
+    border-color: var(--yellow);
+    color: var(--yellow);
+  }
+
+  .btn-primary:hover {
+    background: var(--yellow);
+    color: var(--black);
+  }
+
+  .save-indicator {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .save-indicator.saved { color: #44aa44; }
+  .save-indicator.saving { color: var(--yellow); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark);
+    padding: 0 32px;
+    gap: 0;
+  }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    padding: 12px 24px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .tab:hover { color: var(--white); }
+
+  .tab.active {
+    color: var(--yellow);
+    border-bottom-color: var(--yellow);
+  }
+
+  /* MAIN CONTENT */
+  .content {
+    padding: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--yellow-dim);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  /* FIELD */
+  .field-group {
+    margin-bottom: 24px;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    width: 130px;
+    flex-shrink: 0;
+  }
+
+  .field-dots {
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, var(--border) 0px, var(--border) 4px, transparent 4px, transparent 8px);
+  }
+
+  .field-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-bright);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    outline: none;
+    letter-spacing: 0.05em;
+    transition: border-color 0.15s;
+  }
+
+  .field-input:focus {
+    border-bottom-color: var(--yellow);
+    background: rgba(240,192,32,0.03);
+  }
+
+  .field-input::placeholder { color: var(--border-bright); }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .stat-cell {
+    background: var(--panel);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .stat-name {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    background: var(--black);
+    border: 1px solid var(--border-bright);
+    color: var(--yellow);
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    width: 52px;
+    text-align: center;
+    padding: 4px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .stat-value:focus {
+    border-color: var(--yellow);
+    background: rgba(240,192,32,0.05);
+  }
+
+  /* DOTS TRACKER */
+  .dots-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-bright);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .dot.filled {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    box-shadow: 0 0 8px rgba(240,192,32,0.4);
+  }
+
+  .dot:hover { border-color: var(--yellow); }
+
+  /* TRIANGLE TRACKER (Atenção / Dissipação) */
+  .triangle-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .triangle {
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-bottom: 16px solid var(--border-bright);
+    cursor: pointer;
+    transition: all 0.15s;
+    filter: drop-shadow(0 0 0px transparent);
+  }
+
+  .triangle.filled-atencao {
+    border-bottom-color: var(--yellow);
+    filter: drop-shadow(0 0 4px rgba(240,192,32,0.5));
+  }
+
+  .triangle.filled-dissipacao {
+    border-bottom-color: var(--red);
+    filter: drop-shadow(0 0 4px rgba(204,34,0,0.5));
+  }
+
+  .triangle:hover { border-bottom-color: var(--yellow-dim); }
+
+  /* TEXTAREA */
+  .field-textarea {
+    width: 100%;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 10px 12px;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+
+  .field-textarea:focus {
+    border-color: var(--yellow);
+    background: rgba(240,192,32,0.02);
+  }
+
+  .field-textarea::placeholder { color: var(--muted); }
+
+  /* TWO COL LAYOUT */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  /* STATUS + PROGRESS PANEL */
+  .bottom-panels {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .panel-title {
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: var(--yellow);
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+
+  /* THEME CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .bottom-panels { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+    .header { padding: 12px 16px; }
+  }
+
+  .theme-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .theme-card:hover { border-color: var(--border-bright); }
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+
+  .card-type-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .card-type-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--yellow);
+    font-family: var(--body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 4px;
+    outline: none;
+    width: 100%;
+    text-transform: uppercase;
+  }
+
+  .card-type-input:focus { border-bottom-color: var(--yellow); }
+  .card-type-input::placeholder { color: var(--border-bright); font-weight: 400; }
+
+  .trackers-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .tracker-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tracker-label {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card-section-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .misterio-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 3px 4px;
+    outline: none;
+  }
+
+  .misterio-input:focus { border-bottom-color: var(--yellow); }
+  .misterio-input::placeholder { color: var(--border-bright); }
+
+  .tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tag-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 3px 4px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .tag-input:focus { border-bottom-color: var(--yellow); }
+  .tag-input::placeholder { color: #333; }
+
+  .tag-poder .tag-input::placeholder { color: rgba(240,192,32,0.2); }
+  .tag-fraqueza .tag-input::placeholder { color: rgba(204,34,0,0.2); }
+
+  .melhorias-input {
+    width: 100%;
+    background: var(--black);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    padding: 6px 8px;
+    outline: none;
+    resize: vertical;
+    min-height: 50px;
+    transition: border-color 0.15s;
+  }
+
+  .melhorias-input:focus { border-color: var(--yellow); }
+
+  /* ESQUADRÃO */
+  .esquadrao-section {
+    margin-bottom: 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  .esquadrao-header {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .esquadrao-meta {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .apoio-antagonismo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .aa-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .aa-value {
+    width: 48px;
+    background: var(--black);
+    border: 1px solid var(--border-bright);
+    color: var(--yellow);
+    font-family: var(--mono);
+    font-size: 1rem;
+    text-align: center;
+    padding: 4px;
+    outline: none;
+  }
+
+  .aa-value:focus { border-color: var(--yellow); }
+
+  .esquadrao-members {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .member-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 4px 6px;
+    outline: none;
+  }
+
+  .member-input:focus { border-bottom-color: var(--yellow); }
+  .member-input::placeholder { color: #333; }
+
+  .member-idx {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    width: 16px;
+    flex-shrink: 0;
+  }
+
+  /* PAGE SECTION HEADERS */
+  .page-section-title {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    letter-spacing: 0.2em;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .page-section-meta {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .mutacao-card-header {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .mutacao-full-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--border-bright);
+    color: var(--yellow);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 6px 4px;
+    outline: none;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    transition: border-color 0.15s;
+  }
+
+  .mutacao-full-input:focus { border-bottom-color: var(--yellow); }
+  .mutacao-full-input::placeholder { color: #333; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--yellow);
+    color: var(--black);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 10px 20px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* CODED LABELS */
+  .coded {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--yellow-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--yellow), transparent);
+    margin: 24px 0;
+    opacity: 0.3;
+  }
+
+  /* FIRE ICON SVG inline replacement */
+  .tag-fire::before {
+    content: '▲';
+    color: var(--yellow);
+    font-size: 0.6rem;
+    margin-right: 4px;
+  }
+
+  /* Momentos de evolução */
+  .evolucao-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .evolucao-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 4px 6px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .evolucao-input:focus { border-bottom-color: var(--yellow); }
+  .evolucao-input::placeholder { color: #333; }
+
+  /* IMPORT */
+  .import-area {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .import-area.visible { display: flex; }
+
+  .import-textarea {
+    width: 100%;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 10px;
+    outline: none;
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--yellow-dim); }
+
+  /* Reset input arrows */
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+</style>
 </head>
 <body>
-    <h1>X-Men Character Information</h1>
-    <p>This is a placeholder for X-Men character information.</p>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    <div class="x-logo">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="60" height="60" rx="4" stroke="#f0c020" stroke-width="3"/>
+        <rect x="8" y="8" width="48" height="48" rx="2" stroke="#f0c020" stroke-width="1.5" opacity="0.4"/>
+        <line x1="16" y1="16" x2="48" y2="48" stroke="#f0c020" stroke-width="4" stroke-linecap="square"/>
+        <line x1="48" y1="16" x2="16" y2="48" stroke="#f0c020" stroke-width="4" stroke-linecap="square"/>
+        <rect x="26" y="4" width="12" height="4" fill="#f0c020" opacity="0.6"/>
+        <rect x="26" y="56" width="12" height="4" fill="#f0c020" opacity="0.6"/>
+        <rect x="4" y="26" width="4" height="12" fill="#f0c020" opacity="0.6"/>
+        <rect x="56" y="26" width="4" height="12" fill="#f0c020" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="header-title">
+      <h1>X-MEN</h1>
+      <div class="subtitle">FICHA DE PERSONAGEM // CITY OF MIST SYSTEM</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div>[AG........17.19349.583]</div>
+    <div>[LS........16.23435.161]</div>
+    <div>[8CQ2+53 SALEM CENTER, NY]</div>
+  </div>
+  <div class="header-actions">
+    <span class="save-indicator" id="saveIndicator">// AUTO-SAVE</span>
+    <button class="btn" onclick="resetSheet()">RESET</button>
+    <button class="btn btn-primary" onclick="exportMarkdown()">EXPORT .MD</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="tab active" onclick="switchTab('ficha', this)">01 // FICHA</button>
+  <button class="tab" onclick="switchTab('temas', this)">02 // CARDS DE TEMAS</button>
+  <button class="tab" onclick="switchTab('esquadrao', this)">03 // ESQUADRÃO</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="content">
+
+  <!-- ===== PAGE 1: FICHA ===== -->
+  <section class="page active" id="page-ficha">
+    <div class="page-section-meta">
+      <span class="coded">[LSSP78445] [120....JL] [XSL...12.45]</span>
+      <span class="coded">ARQUIVO: CLASSIFICADO // XAVIER INSTITUTE</span>
+    </div>
+
+    <!-- Nome + Mutação -->
+    <div class="field-group">
+      <div class="field-row">
+        <span class="field-label">NOME</span>
+        <input type="text" class="field-input" id="nome" placeholder="Nome do personagem" oninput="autoSave()">
+      </div>
+      <div class="field-row">
+        <span class="field-label">MUTAÇÃO</span>
+        <input type="text" class="field-input" id="mutacao-ficha" placeholder="Tipo de mutação" oninput="autoSave()">
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="section-label">ATRIBUTOS</div>
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <span class="stat-name">DESTREZA</span>
+        <input type="number" class="stat-value" id="stat-destreza" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">FORÇA</span>
+        <input type="number" class="stat-value" id="stat-forca" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">CORPO</span>
+        <input type="number" class="stat-value" id="stat-corpo" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">INTELIGÊNCIA</span>
+        <input type="number" class="stat-value" id="stat-inteligencia" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">VONTADE</span>
+        <input type="number" class="stat-value" id="stat-vontade" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">MENTE</span>
+        <input type="number" class="stat-value" id="stat-mente" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">INFLUÊNCIA</span>
+        <input type="number" class="stat-value" id="stat-influencia" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">AURA</span>
+        <input type="number" class="stat-value" id="stat-aura" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+      <div class="stat-cell">
+        <span class="stat-name">ESPÍRITO</span>
+        <input type="number" class="stat-value" id="stat-espirito" placeholder="—" min="0" max="99" oninput="autoSave()">
+      </div>
+    </div>
+
+    <!-- Bottom: Status + Progress -->
+    <div class="bottom-panels">
+      <div class="panel">
+        <div class="panel-title">STATUS</div>
+        <textarea class="field-textarea" id="status" placeholder="Estado atual do personagem, condições ativas, notas..." style="min-height:120px" oninput="autoSave()"></textarea>
+      </div>
+
+      <div>
+        <div class="panel" style="margin-bottom:12px">
+          <div class="panel-title">PROGRESSÃO</div>
+          <div class="progress-section">
+            <div class="progress-row">
+              <span class="progress-label">PROGRESSO</span>
+              <div class="dots-row" id="dots-progressao"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">MOMENTOS DE EVOLUÇÃO</div>
+          <div class="evolucao-list" id="evolucao-list">
+            <!-- generated -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE 2: CARDS DE TEMAS ===== -->
+  <section class="page" id="page-temas">
+    <div class="page-section-meta">
+      <span class="coded">[16.23435.161] [LSSP78445]</span>
+      <span class="coded">TEMAS DE PERSONAGEM // 4 SLOTS</span>
+    </div>
+
+    <div class="mutacao-card-header">MUTAÇÃO // TEMA CENTRAL</div>
+    <input type="text" class="mutacao-full-input" id="mutacao-temas" placeholder="Descreva a mutação e seu tema central..." oninput="autoSave()">
+
+    <div class="cards-grid" id="temas-grid">
+      <!-- generated by JS -->
+    </div>
+  </section>
+
+  <!-- ===== PAGE 3: ESQUADRÃO ===== -->
+  <section class="page" id="page-esquadrao">
+    <div class="page-section-meta">
+      <span class="coded">[16.23435.161] [LSSP78445]</span>
+      <span class="coded">CARDS EXTRA // ESQUADRÃO</span>
+    </div>
+
+    <!-- Esquadrão Header -->
+    <div class="esquadrao-section">
+      <div class="esquadrao-header">
+        <div>
+          <div class="section-label">ESQUADRÃO</div>
+          <input type="text" class="field-input" id="esquadrao-nome" placeholder="Nome do esquadrão / time" style="width:280px" oninput="autoSave()">
+        </div>
+        <div class="apoio-antagonismo">
+          <span class="aa-label">APOIO</span>
+          <input type="number" class="aa-value" id="apoio" placeholder="0" min="0" max="99" oninput="autoSave()">
+        </div>
+        <div class="apoio-antagonismo">
+          <span class="aa-label" style="color: #cc6644">ANTAGONISMO</span>
+          <input type="number" class="aa-value" id="antagonismo" placeholder="0" min="0" max="99" style="color:#cc6644" oninput="autoSave()">
+        </div>
+      </div>
+      <div class="section-label" style="margin-bottom:8px">MEMBROS</div>
+      <div class="esquadrao-members" id="esquadrao-members">
+        <!-- generated -->
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:12px">CARDS EXTRAS DE ESQUADRÃO</div>
+    <div class="cards-grid" id="esquadrao-grid">
+      <!-- generated by JS -->
+    </div>
+  </section>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA MODEL
+// ============================================================
+const STORAGE_KEY = 'xmen_ficha_v1';
+
+const defaultData = {
+  nome: '', mutacao_ficha: '', mutacao_temas: '',
+  stats: { destreza: '', forca: '', corpo: '', inteligencia: '', vontade: '', mente: '', influencia: '', aura: '', espirito: '' },
+  status: '',
+  progressao: 0,
+  evolucao: ['','','','',''],
+  temas: Array.from({length:4}, () => ({
+    tipo: '', misterio: '',
+    atencao: 0, dissipacao: 0,
+    poder: ['','','','','','',''],
+    fraqueza: ['','',''],
+    melhorias: ''
+  })),
+  esquadrao_nome: '', apoio: '', antagonismo: '',
+  membros: ['','','','','','',''],
+  extras: Array.from({length:4}, () => ({
+    tipo: '', misterio: '',
+    atencao: 0, dissipacao: 0,
+    poder: ['','','','','','',''],
+    fraqueza: ['','',''],
+    melhorias: ''
+  }))
+};
+
+let data = JSON.parse(JSON.stringify(defaultData));
+let saveTimer = null;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadFromStorage();
+  buildDots();
+  buildEvolucao();
+  buildCardsGrid('temas-grid', data.temas, 'temas');
+  buildCardsGrid('esquadrao-grid', data.extras, 'extras');
+  buildMembers();
+  populateFields();
+});
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ============================================================
+// BUILD UI COMPONENTS
+// ============================================================
+function buildDots() {
+  const container = document.getElementById('dots-progressao');
+  container.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < data.progressao ? ' filled' : '');
+    d.dataset.idx = i;
+    d.addEventListener('click', () => {
+      data.progressao = (data.progressao === i + 1) ? i : i + 1;
+      buildDots();
+      autoSave();
+    });
+    container.appendChild(d);
+  }
+}
+
+function buildEvolucao() {
+  const container = document.getElementById('evolucao-list');
+  container.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'evolucao-input';
+    inp.placeholder = `Momento ${i+1}...`;
+    inp.value = data.evolucao[i] || '';
+    inp.dataset.idx = i;
+    inp.addEventListener('input', e => {
+      data.evolucao[e.target.dataset.idx] = e.target.value;
+      autoSave();
+    });
+    container.appendChild(inp);
+  }
+}
+
+function buildMembers() {
+  const container = document.getElementById('esquadrao-members');
+  container.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    row.innerHTML = `<span class="member-idx">${String(i+1).padStart(2,'0')}</span>`;
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'member-input';
+    inp.placeholder = `Membro ${i+1}...`;
+    inp.value = data.membros[i] || '';
+    inp.dataset.idx = i;
+    inp.addEventListener('input', e => {
+      data.membros[e.target.dataset.idx] = e.target.value;
+      autoSave();
+    });
+    row.appendChild(inp);
+    container.appendChild(row);
+  }
+}
+
+function buildCardsGrid(containerId, cardsData, prefix) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  cardsData.forEach((card, ci) => {
+    container.appendChild(buildCard(card, ci, prefix));
+  });
+}
+
+function buildCard(card, ci, prefix) {
+  const div = document.createElement('div');
+  div.className = 'theme-card';
+
+  // TIPO
+  const hdr = document.createElement('div');
+  hdr.className = 'card-header';
+  hdr.innerHTML = `<span class="card-type-label">TIPO</span>`;
+  const tipoInp = document.createElement('input');
+  tipoInp.type = 'text';
+  tipoInp.className = 'card-type-input';
+  tipoInp.placeholder = 'Adaptabilidade';
+  tipoInp.value = card.tipo || '';
+  tipoInp.addEventListener('input', e => { card.tipo = e.target.value; autoSave(); });
+  hdr.appendChild(tipoInp);
+  div.appendChild(hdr);
+
+  // TRACKERS
+  const trackRow = document.createElement('div');
+  trackRow.className = 'trackers-row';
+
+  // Atenção
+  const atGrp = document.createElement('div');
+  atGrp.className = 'tracker-group';
+  atGrp.innerHTML = '<span class="tracker-label">ATENÇÃO</span>';
+  const atRow = document.createElement('div');
+  atRow.className = 'triangle-row';
+  for (let i = 0; i < 3; i++) {
+    const t = document.createElement('div');
+    t.className = 'triangle' + (i < card.atencao ? ' filled-atencao' : '');
+    t.addEventListener('click', () => {
+      card.atencao = (card.atencao === i + 1) ? i : i + 1;
+      buildCardsGrid(prefix === 'temas' ? 'temas-grid' : 'esquadrao-grid', prefix === 'temas' ? data.temas : data.extras, prefix);
+      autoSave();
+    });
+    atRow.appendChild(t);
+  }
+  atGrp.appendChild(atRow);
+  trackRow.appendChild(atGrp);
+
+  // Dissipação
+  const dsGrp = document.createElement('div');
+  dsGrp.className = 'tracker-group';
+  dsGrp.innerHTML = '<span class="tracker-label" style="color:#cc6644">DISSIP/QUEBRA</span>';
+  const dsRow = document.createElement('div');
+  dsRow.className = 'triangle-row';
+  for (let i = 0; i < 3; i++) {
+    const t = document.createElement('div');
+    t.className = 'triangle' + (i < card.dissipacao ? ' filled-dissipacao' : '');
+    t.addEventListener('click', () => {
+      card.dissipacao = (card.dissipacao === i + 1) ? i : i + 1;
+      buildCardsGrid(prefix === 'temas' ? 'temas-grid' : 'esquadrao-grid', prefix === 'temas' ? data.temas : data.extras, prefix);
+      autoSave();
+    });
+    dsRow.appendChild(t);
+  }
+  dsGrp.appendChild(dsRow);
+  trackRow.appendChild(dsGrp);
+  div.appendChild(trackRow);
+
+  // MISTÉRIO/IDENTIDADE
+  const misLabel = document.createElement('div');
+  misLabel.className = 'card-section-label';
+  misLabel.textContent = 'MISTÉRIO / IDENTIDADE';
+  div.appendChild(misLabel);
+  const misInp = document.createElement('input');
+  misInp.type = 'text';
+  misInp.className = 'misterio-input';
+  misInp.placeholder = '...';
+  misInp.value = card.misterio || '';
+  misInp.addEventListener('input', e => { card.misterio = e.target.value; autoSave(); });
+  div.appendChild(misInp);
+
+  // TAGS DE PODER
+  const poderLabel = document.createElement('div');
+  poderLabel.className = 'card-section-label';
+  poderLabel.style.marginTop = '6px';
+  poderLabel.innerHTML = '▲ TAGS DE PODER';
+  poderLabel.style.color = 'rgba(240,192,32,0.6)';
+  div.appendChild(poderLabel);
+  const poderList = document.createElement('div');
+  poderList.className = 'tags-list tag-poder';
+  for (let i = 0; i < 7; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'tag-input';
+    inp.placeholder = `tag ${i+1}`;
+    inp.value = (card.poder && card.poder[i]) || '';
+    inp.addEventListener('input', e => { card.poder[i] = e.target.value; autoSave(); });
+    poderList.appendChild(inp);
+  }
+  div.appendChild(poderList);
+
+  // TAGS DE FRAQUEZA
+  const fraqLabel = document.createElement('div');
+  fraqLabel.className = 'card-section-label';
+  fraqLabel.style.marginTop = '6px';
+  fraqLabel.innerHTML = '▼ TAGS DE FRAQUEZA';
+  fraqLabel.style.color = 'rgba(204,34,0,0.6)';
+  div.appendChild(fraqLabel);
+  const fraqList = document.createElement('div');
+  fraqList.className = 'tags-list tag-fraqueza';
+  for (let i = 0; i < 3; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'tag-input';
+    inp.placeholder = `fraqueza ${i+1}`;
+    inp.value = (card.fraqueza && card.fraqueza[i]) || '';
+    inp.addEventListener('input', e => { card.fraqueza[i] = e.target.value; autoSave(); });
+    fraqList.appendChild(inp);
+  }
+  div.appendChild(fraqList);
+
+  // MELHORIAS
+  const melLabel = document.createElement('div');
+  melLabel.className = 'card-section-label';
+  melLabel.style.marginTop = '6px';
+  melLabel.textContent = 'MELHORIAS';
+  div.appendChild(melLabel);
+  const melInp = document.createElement('textarea');
+  melInp.className = 'melhorias-input';
+  melInp.placeholder = '...';
+  melInp.value = card.melhorias || '';
+  melInp.addEventListener('input', e => { card.melhorias = e.target.value; autoSave(); });
+  div.appendChild(melInp);
+
+  return div;
+}
+
+// ============================================================
+// POPULATE FIELDS FROM DATA
+// ============================================================
+function populateFields() {
+  setVal('nome', data.nome);
+  setVal('mutacao-ficha', data.mutacao_ficha);
+  setVal('mutacao-temas', data.mutacao_temas);
+  setVal('status', data.status);
+  setVal('esquadrao-nome', data.esquadrao_nome);
+  setVal('apoio', data.apoio);
+  setVal('antagonismo', data.antagonismo);
+
+  const stats = ['destreza','forca','corpo','inteligencia','vontade','mente','influencia','aura','espirito'];
+  stats.forEach(s => setVal('stat-' + s, data.stats[s]));
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val || '';
+}
+
+// ============================================================
+// COLLECT DATA FROM DOM
+// ============================================================
+function collectData() {
+  data.nome = getVal('nome');
+  data.mutacao_ficha = getVal('mutacao-ficha');
+  data.mutacao_temas = getVal('mutacao-temas');
+  data.status = getVal('status');
+  data.esquadrao_nome = getVal('esquadrao-nome');
+  data.apoio = getVal('apoio');
+  data.antagonismo = getVal('antagonismo');
+
+  const stats = ['destreza','forca','corpo','inteligencia','vontade','mente','influencia','aura','espirito'];
+  stats.forEach(s => { data.stats[s] = getVal('stat-' + s); });
+  // evolucao and cards collected inline via event listeners
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+function autoSave() {
+  collectData();
+  clearTimeout(saveTimer);
+  setIndicator('saving', '// SAVING...');
+  saveTimer = setTimeout(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setIndicator('saved', '// SAVED ✓');
+    setTimeout(() => setIndicator('', '// AUTO-SAVE'), 1500);
+  }, 600);
+}
+
+function setIndicator(cls, txt) {
+  const el = document.getElementById('saveIndicator');
+  el.className = 'save-indicator ' + cls;
+  el.textContent = txt;
+}
+
+function loadFromStorage() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      // deep merge to handle new fields
+      data = deepMerge(defaultData, parsed);
+    } catch(e) { data = JSON.parse(JSON.stringify(defaultData)); }
+  }
+}
+
+function deepMerge(base, override) {
+  const result = JSON.parse(JSON.stringify(base));
+  for (const key in override) {
+    if (override[key] !== null && typeof override[key] === 'object' && !Array.isArray(override[key])) {
+      result[key] = deepMerge(base[key] || {}, override[key]);
+    } else {
+      result[key] = override[key];
+    }
+  }
+  return result;
+}
+
+function resetSheet() {
+  if (!confirm('Resetar toda a ficha? Esta ação não pode ser desfeita.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  data = JSON.parse(JSON.stringify(defaultData));
+  populateFields();
+  buildDots();
+  buildEvolucao();
+  buildCardsGrid('temas-grid', data.temas, 'temas');
+  buildCardsGrid('esquadrao-grid', data.extras, 'extras');
+  buildMembers();
+  showToast('FICHA RESETADA');
+}
+
+// ============================================================
+// EXPORT MARKDOWN
+// ============================================================
+function exportMarkdown() {
+  collectData();
+  const d = data;
+  const nome = d.nome || 'SEM NOME';
+  const now = new Date().toLocaleString('pt-BR');
+
+  let md = `# FICHA DE PERSONAGEM — ${nome.toUpperCase()}
+> X-MEN TTRPG // CITY OF MIST SYSTEM  
+> Exportado em: ${now}
+
+---
+
+## IDENTIFICAÇÃO
+
+| Campo | Valor |
+|---|---|
+| **Nome** | ${d.nome || '—'} |
+| **Mutação** | ${d.mutacao_ficha || '—'} |
+
+---
+
+## ATRIBUTOS
+
+| Atributo | Valor | Atributo | Valor | Atributo | Valor |
+|---|---|---|---|---|---|
+| Destreza | **${d.stats.destreza || '—'}** | Força | **${d.stats.forca || '—'}** | Corpo | **${d.stats.corpo || '—'}** |
+| Inteligência | **${d.stats.inteligencia || '—'}** | Vontade | **${d.stats.vontade || '—'}** | Mente | **${d.stats.mente || '—'}** |
+| Influência | **${d.stats.influencia || '—'}** | Aura | **${d.stats.aura || '—'}** | Espírito | **${d.stats.espirito || '—'}** |
+
+---
+
+## STATUS
+
+${d.status || '*Sem status registrado.*'}
+
+---
+
+## PROGRESSÃO
+
+Progresso: ${'●'.repeat(d.progressao)}${'○'.repeat(Math.max(0, 6-d.progressao))} (${d.progressao}/6)
+
+### Momentos de Evolução
+
+${d.evolucao.map((e,i) => `${i+1}. ${e || '—'}`).join('\n')}
+
+---
+
+## MUTAÇÃO (TEMA CENTRAL)
+
+${d.mutacao_temas || '*Não definida.*'}
+
+---
+
+## CARDS DE TEMAS
+
+`;
+
+  d.temas.forEach((card, i) => {
+    md += cardToMarkdown(card, i + 1);
+  });
+
+  md += `---\n\n## ESQUADRÃO\n\n`;
+  md += `**Nome:** ${d.esquadrao_nome || '—'}  \n`;
+  md += `**Apoio:** ${d.apoio || '0'} | **Antagonismo:** ${d.antagonismo || '0'}\n\n`;
+  md += `### Membros\n\n`;
+  d.membros.forEach((m, i) => {
+    md += `${i+1}. ${m || '—'}\n`;
+  });
+  md += `\n---\n\n## CARDS EXTRAS / ESQUADRÃO\n\n`;
+  d.extras.forEach((card, i) => {
+    md += cardToMarkdown(card, i + 1);
+  });
+
+  md += `---\n*[AG........17.19349.583] [LS........16.23435.161]*  \n*[8CQ2+53 SALEM CENTER, NOVA YORK, EUA]*\n`;
+
+  // Download
+  const blob = new Blob([md], {type: 'text/markdown'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ficha-${nome.replace(/\s+/g,'_').toLowerCase()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('EXPORTADO COM SUCESSO');
+}
+
+function cardToMarkdown(card, num) {
+  const atStr = '▲'.repeat(card.atencao || 0) + '△'.repeat(3 - (card.atencao || 0));
+  const dsStr = '▼'.repeat(card.dissipacao || 0) + '▽'.repeat(3 - (card.dissipacao || 0));
+  let md = `### Card ${num} — ${card.tipo || 'SEM TIPO'}\n\n`;
+  md += `**Atenção:** ${atStr} | **Dissipação/Quebra:** ${dsStr}\n\n`;
+  if (card.misterio) md += `**Mistério/Identidade:** ${card.misterio}\n\n`;
+  const poder = (card.poder || []).filter(t => t.trim());
+  if (poder.length) {
+    md += `**Tags de Poder:**\n`;
+    poder.forEach(t => { md += `- ▲ ${t}\n`; });
+    md += '\n';
+  }
+  const fraq = (card.fraqueza || []).filter(t => t.trim());
+  if (fraq.length) {
+    md += `**Tags de Fraqueza:**\n`;
+    fraq.forEach(t => { md += `- ▼ ${t}\n`; });
+    md += '\n';
+  }
+  if (card.melhorias) md += `**Melhorias:** ${card.melhorias}\n\n`;
+  return md;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '// ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
 </body>
 </html>
