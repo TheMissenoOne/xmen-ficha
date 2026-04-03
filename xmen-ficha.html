@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-Men Character Sheet</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>X-Men Character Sheet</h1>
+        <div id="theme-toggle">Toggle Theme</div>
+    </header>
+    <main>
+        <form id="character-form">
+            <label for="name">Character Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="stats">Character Stats:</label>
+            <textarea id="stats" name="stats" required></textarea>
+
+            <label for="squad">Squad:</label>
+            <input type="text" id="squad" name="squad">
+
+            <button type="button" id="save-button">Save Character</button>
+            <button type="button" id="export-button">Export as Markdown</button>
+        </form>
+        <div id="character-preview"></div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
